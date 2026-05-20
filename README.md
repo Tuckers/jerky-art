@@ -1,88 +1,117 @@
-# Jerky Collection — Cloudflare Pages Edition
+# Jerky Collection
 
-A personal Pokémon TCG collection checklist for cards illustrated by Jerky, with cross-device sync via Cloudflare Pages Functions + KV.
+Personal Pokémon TCG checklist for cards illustrated by Jerky. SvelteKit app deployed as a single Cloudflare Worker with KV-backed cross-device sync.
 
-## What's in this folder
+## Stack
+
+- **SvelteKit 2** + **Svelte 5** (runes only)
+- **TypeScript** + **SCSS**
+- **@sveltejs/adapter-cloudflare** → compiles into one Cloudflare Worker
+- **Cloudflare KV** for persistence (`STORAGE_KV` binding)
+- Bearer-token auth (`WRITE_TOKEN` secret) on every write
+
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Opens at <http://localhost:5173>. KV is emulated locally by Miniflare via Wrangler — your dev data lives in `.wrangler/state/` and does **not** touch production KV.
+
+For dev writes you'll still be prompted for an edit token. Either set it in `.dev.vars`:
 
 ```
-jerky-cloudflare/
-├── index.html                          # The app (single self-contained file)
-└── functions/
-    └── api/
-        ├── storage.js                  # /api/storage  (GET, POST, DELETE)
-        └── storage/
-            └── list.js                 # /api/storage/list  (GET)
+WRITE_TOKEN=anything-you-want-locally
 ```
 
-The HTML auto-detects which storage backend to use:
+or just paste the same string into the prompt — it's stored in localStorage per-browser.
 
-1. **Claude artifact runtime** → uses `window.storage`
-2. **Cloudflare Pages** → uses these Functions + KV
-3. **Anywhere else** → falls back to `localStorage`
+## Cloudflare setup (one time)
 
-You'll see which backend is active in the footer (e.g. "CF KV").
+### 1. Create the KV namespace
 
-## Deploy steps
+```bash
+npx wrangler kv namespace create STORAGE_KV
+```
 
-### 1. Create a KV namespace
+Copy the printed `id` into `wrangler.toml`, replacing `REPLACE_WITH_YOUR_KV_NAMESPACE_ID`:
 
-In the Cloudflare dashboard → **Workers & Pages → KV → Create namespace**. Name it whatever you like (e.g. `jerky-collection`). Copy the namespace ID.
+```toml
+[[kv_namespaces]]
+binding = "STORAGE_KV"
+id = "abc123…"
+```
 
-### 2. Create the Pages project
+Commit that change — the binding is now declarative.
 
-**Option A — Drag and drop (fastest):**
-1. Go to **Workers & Pages → Create application → Pages → Upload assets**
-2. Name the project (e.g. `jerky-collection`)
-3. Drag this entire folder onto the upload area
-4. Deploy
+### 2. Set the write token
 
-**Option B — Git:**
-1. Push this folder to a GitHub repo
-2. **Pages → Connect to Git** → select the repo
-3. Build settings: framework `None`, output directory left blank
-4. Deploy
+```bash
+npx wrangler secret put WRITE_TOKEN
+```
 
-### 3. Bind KV + set the write token
+You'll be prompted to paste a long random string. This is the edit password the app prompts for on first write.
 
-Go to your new Pages project → **Settings → Functions**:
+### 3. Hook up GitHub auto-deploys
 
-- **KV namespace bindings**: add a binding with variable name `STORAGE_KV` pointing at the namespace from step 1
-- **Environment variables → Production**: add `WRITE_TOKEN` with a long random string of your choice (this is your edit password)
+Two options:
 
-Trigger a redeploy so the binding takes effect (any of: push a commit, click "Retry deployment", or change a setting).
+**A. Cloudflare Workers Builds (recommended)** — `Workers & Pages → Create → Connect to Git`, pick this repo. Cloudflare auto-detects SvelteKit, runs `npm run build`, and deploys the Worker on every push to `main`. The KV binding from `wrangler.toml` is read on each build; you do **not** need to configure it in the dashboard.
 
-### 4. Use it
+**B. Deploy from your machine**
 
-Open the deployed URL. Reads work without auth. The first time you toggle a card or edit anything, the app will prompt for your edit token — paste in the `WRITE_TOKEN` value. It's stored in your browser's localStorage so you won't be asked again on that device.
+```bash
+npm run deploy
+```
 
-## Behavior notes
+This runs `vite build` and then `wrangler deploy` against the project named in `wrangler.toml`.
 
-**Per-device token cache.** The edit token is stored locally per browser. To set it up on a new device or browser, just visit the site and make any change — you'll be prompted.
+## Project layout
 
-**Wrong token.** A 401 response clears the cached token automatically; you'll be re-prompted next time.
+```
+src/
+├── app.html, app.scss, app.d.ts
+├── lib/
+│   ├── data/seed-cards.ts        # seed list + set codes + default orderings
+│   ├── styles/colors.scss        # CSS custom properties, imported via $styles alias
+│   ├── stores/AppState.svelte.ts # reactive state (cards, collection, artwork) using Svelte 5 runes
+│   ├── variants.ts               # regular/RH/Poké Ball/Master Ball + custom:<name> helpers
+│   ├── storage.ts                # thin client over /api/storage
+│   ├── urls.ts                   # TCGplayer / Limitless / Art of PKM link builders
+│   └── components/               # Header, Tabs, Toolbar, SetSection, CardTile, Modal, …
+└── routes/
+    ├── +layout.svelte
+    ├── +page.svelte              # orchestrates the page
+    └── api/storage/              # +server.ts handlers for GET/POST/DELETE/list
+```
 
-**Read access is public.** Anyone with the URL can see your collection. Writes require the token. If you want to lock down reads too, add the same `requireAuth` check inside `onRequestGet` in both function files.
+## How the storage flow works
 
-**Artwork storage.** Uploaded images get stored as base64 in KV (which has a 25 MiB per-value limit, so individual 4 MB images are fine). For a leaner setup you could route artwork through Cloudflare R2 instead — happy to wire that up if it ever matters.
+All persistence calls go through `src/lib/storage.ts`, which hits the same-origin SvelteKit endpoints under `/api/storage`. Those endpoints, in turn, hit `platform.env.STORAGE_KV` — the binding configured in `wrangler.toml`.
 
-**KV is eventually consistent.** Reads can briefly return stale data right after a write. In practice for a personal checklist this is invisible, but worth knowing.
+- **Reads** (`GET /api/storage`, `GET /api/storage/list`) are public.
+- **Writes** (`POST` / `DELETE`) require `Authorization: Bearer <WRITE_TOKEN>`.
+- A 401 clears the cached token in the browser so the user is re-prompted on the next change.
 
-## Migrating existing data
+KV value cap is 25 MiB; the endpoint rejects anything over 24 MiB with a 413.
 
-If you've been using the Claude version or the localStorage version and want to bring that data over:
+## Custom variants
 
-1. In the source version, click **`{ } Data`** → **Copy** to grab the JSON
-2. Open the deployed Cloudflare version, click **`{ } Data`**, paste the JSON in
-3. Click **Apply Changes** — you'll be prompted for your `WRITE_TOKEN`
+Each card supports a free-text `customVariants` array (set via the card detail modal as a comma-separated input). Built-in variants are `regular`, `reverse_holo`, `poke_ball`, `master_ball`; custom ones are encoded as `custom:<name>` everywhere they're referenced so they round-trip cleanly through tile IDs and PTCGL export suffixes.
 
-Collection state (which cards you own) is stored separately and isn't included in the Data JSON. You can sync those manually, or once I add a "full backup" export I'll wire that in too.
+## Migrating data from a previous deploy
 
-## Resetting the auth token in your browser
+Open the **`{ } Data`** modal, paste the JSON from your old deploy, click **Apply Changes**. Ownership state is stored separately under `jerky-collection-v3` — back it up via the browser console if needed:
 
-If you ever want to force-clear the locally cached edit token (e.g. you typed the wrong one and want a clean re-prompt), open the browser devtools console on the site and run:
+```js
+fetch('/api/storage?key=jerky-collection-v3').then(r => r.json()).then(console.log)
+```
+
+## Resetting the cached edit token
 
 ```js
 localStorage.removeItem('jerky-auth-token')
 ```
 
-Then refresh and make any edit to be prompted again.
+Then make any edit to be re-prompted.

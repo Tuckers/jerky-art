@@ -1,0 +1,20 @@
+name = "jerky-collection"
+main = ".svelte-kit/cloudflare/_worker.js"
+compatibility_date = "2024-12-30"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[assets]
+directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
+
+# Replace `id` with the namespace ID printed by:
+#   npx wrangler kv namespace create STORAGE_KV
+# (or copy it from the Cloudflare dashboard).
+[[kv_namespaces]]
+binding = "STORAGE_KV"
+id = "0404e6115bdd4cb38fd4cf211cbc399e"
+
+# WRITE_TOKEN is a secret, NOT a [vars] entry. Set it with:
+#   npx wrangler secret put WRITE_TOKEN
+# (or via the Cloudflare dashboard → Worker → Settings → Variables and Secrets).
