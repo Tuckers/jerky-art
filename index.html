@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jerky Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #efeae0;
+    --bg-grid: #e6e1d6;
+    --ink: #0d0c0a;
+    --ink-soft: #4a4640;
+    --ink-muted: #908a7e;
+    --rule: #c8c2b3;
+    --paper: #f6f2e8;
+    --accent: #c8341c;
+    --accent-deep: #8a2412;
+    --collected: #1f4d2b;
+    --collected-bg: #d8e1d2;
+    --jp-accent: #2a4a8c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: -1px -1px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 40px 80px;
+  }
+
+  /* HEADER */
+  header {
+    border-top: 4px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 24px 0 20px;
+    margin-bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+  }
+
+  .masthead {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 700;
+    font-size: clamp(48px, 7vw, 84px);
+    line-height: 0.88;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .masthead .subtitle {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    margin-top: 12px;
+    color: var(--ink-soft);
+  }
+
+  .stats {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .stats .big-num {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-feature-settings: "tnum";
+  }
+
+  .stats .big-num .of { color: var(--ink-muted); font-weight: 400; }
+
+  .stats .label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 22px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+
+  .tab:hover { color: var(--ink); }
+
+  .tab.active {
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -1px 0;
+    height: 3px;
+    background: var(--ink);
+  }
+
+  .tab .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    margin-left: 8px;
+    font-feature-settings: "tnum";
+    font-weight: 400;
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 14px;
+    margin-bottom: 28px;
+  }
+
+  .toolbar-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .btn {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .btn:hover { border-color: var(--ink); color: var(--ink); }
+  .btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .btn-primary {
+    border-color: var(--ink);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn-accent {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .btn-accent:hover {
+    background: var(--accent);
+    color: var(--paper);
+  }
+
+  .btn-danger {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-danger:hover {
+    background: var(--accent);
+    color: var(--paper);
+  }
+
+  /* SET SECTIONS */
+  .set-section { margin-bottom: 56px; }
+
+  .set-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: baseline;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+  }
+
+  .set-name {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  body.lang-ja .set-name::before {
+    content: '日 ';
+    color: var(--jp-accent);
+    font-size: 18px;
+    margin-right: 4px;
+  }
+
+  .set-rule {
+    height: 1px;
+    background: var(--rule);
+    align-self: center;
+    margin-bottom: 4px;
+  }
+
+  .set-count {
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    font-feature-settings: "tnum";
+  }
+
+  .set-reorder {
+    display: none;
+    gap: 4px;
+    align-items: center;
+  }
+  body.edit-mode .set-reorder { display: inline-flex; }
+
+  .set-arrow {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    width: 24px;
+    height: 22px;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--ink);
+    padding: 0;
+    transition: all 0.12s ease;
+  }
+  .set-arrow:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .set-arrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+  .set-arrow:disabled:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* CARD GRID */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .card-tile {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: all 0.12s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-tile:hover {
+    border-color: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .card-tile.collected {
+    background: var(--collected-bg);
+    border-color: var(--collected);
+  }
+
+  .card-tile.collected:hover {
+    box-shadow: 3px 3px 0 var(--collected);
+  }
+
+  body.edit-mode .card-tile {
+    border-style: dashed;
+  }
+
+  body.edit-mode .card-tile:hover {
+    border-color: var(--accent);
+    box-shadow: 3px 3px 0 var(--accent);
+  }
+
+  /* Card art */
+  .card-art {
+    aspect-ratio: 5 / 7;
+    background: var(--bg-grid);
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+
+  .card-art-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--paper);
+  }
+
+  .card-art-inner {
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+    background: var(--paper);
+  }
+
+  .card-art-name {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.05;
+    text-transform: uppercase;
+    word-break: break-word;
+  }
+
+  .card-art-placeholder {
+    flex: 1;
+    margin: 8px 0;
+    border: 1px dashed var(--ink-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-muted);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .card-art-num {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    font-feature-settings: "tnum";
+  }
+
+  /* Variant placeholders (only shown when no image) */
+  .variant-regular .card-art-placeholder {
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 8px,
+      rgba(13,12,10,0.04) 8px, rgba(13,12,10,0.04) 9px);
+  }
+  .variant-reverse_holo .card-art-placeholder {
+    background:
+      linear-gradient(135deg,
+        rgba(255,100,100,0.18),
+        rgba(100,255,180,0.18),
+        rgba(100,150,255,0.18),
+        rgba(255,200,100,0.18));
+  }
+  .variant-poke_ball .card-art-placeholder {
+    background:
+      radial-gradient(circle at 28% 32%, rgba(200,52,28,0.28) 0%, rgba(200,52,28,0.28) 16%, transparent 16%),
+      radial-gradient(circle at 72% 65%, rgba(200,52,28,0.22) 0%, rgba(200,52,28,0.22) 12%, transparent 12%),
+      radial-gradient(circle at 20% 80%, rgba(200,52,28,0.18) 0%, rgba(200,52,28,0.18) 8%, transparent 8%),
+      var(--bg-grid);
+  }
+  .variant-master_ball .card-art-placeholder {
+    background:
+      radial-gradient(circle at 32% 38%, rgba(120,50,160,0.32) 0%, rgba(120,50,160,0.32) 14%, transparent 14%),
+      radial-gradient(circle at 72% 70%, rgba(120,50,160,0.24) 0%, rgba(120,50,160,0.24) 10%, transparent 10%),
+      linear-gradient(180deg, rgba(120,50,160,0.06), rgba(120,50,160,0.16));
+  }
+
+  /* Variant chip overlay when image present */
+  .variant-chip {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 6px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    z-index: 2;
+  }
+
+  .variant-chip.chip-reverse_holo { background: linear-gradient(90deg, #ffe7e7, #e7ffe7, #e7e7ff); }
+  .variant-chip.chip-poke_ball { background: var(--accent); color: var(--paper); border-color: var(--accent-deep); }
+  .variant-chip.chip-master_ball { background: #5b2e8a; color: var(--paper); border-color: #3a1d59; }
+
+  .card-meta {
+    padding: 10px 12px;
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .card-tile.collected .card-meta {
+    background: var(--collected-bg);
+    border-color: var(--collected);
+  }
+
+  .card-pokemon {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.15;
+    margin-bottom: 4px;
+  }
+
+  .card-set-line {
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    font-feature-settings: "tnum";
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .card-variant-tag {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 2px 5px;
+    border: 1px solid var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .variant-tag-reverse_holo { background: linear-gradient(90deg, #ffe7e7, #e7ffe7, #e7e7ff); }
+  .variant-tag-poke_ball { background: var(--accent); color: var(--paper); border-color: var(--accent-deep); }
+  .variant-tag-master_ball { background: #5b2e8a; color: var(--paper); border-color: #3a1d59; }
+
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .check-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .check-box {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--ink);
+    display: inline-block;
+    position: relative;
+    background: var(--paper);
+    flex-shrink: 0;
+  }
+
+  .card-tile.collected .check-indicator {
+    color: var(--collected);
+    font-weight: 700;
+  }
+
+  .card-tile.collected .check-box {
+    background: var(--collected);
+    border-color: var(--collected);
+  }
+
+  .card-tile.collected .check-box::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--paper);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .link-group { display: flex; gap: 4px; }
+
+  .ext-link {
+    width: 26px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 9px;
+    text-decoration: none;
+    transition: all 0.12s ease;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .ext-link:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .card-notes {
+    font-size: 9px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+
+  .card-tile.unreleased .card-art-placeholder::after {
+    content: 'UNRELEASED';
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: 10px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,12,10,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-family: 'IBM Plex Sans Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid var(--ink);
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-body p {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .export-area {
+    width: 100%;
+    border: 1px solid var(--ink);
+    padding: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: var(--bg);
+    resize: vertical;
+    min-height: 240px;
+    color: var(--ink);
+  }
+
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .copy-status {
+    font-size: 10px;
+    color: var(--collected);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .copy-status.show { opacity: 1; }
+
+  /* CARD DETAIL MODAL */
+  .card-detail {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 600px) {
+    .card-detail { grid-template-columns: 1fr; }
+  }
+
+  .art-preview {
+    aspect-ratio: 5/7;
+    background: var(--bg-grid);
+    border: 1px solid var(--rule);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .art-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .art-preview-empty {
+    color: var(--ink-muted);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .art-controls {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .file-drop {
+    border: 1px dashed var(--ink);
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    transition: all 0.15s ease;
+    background: var(--paper);
+  }
+
+  .file-drop:hover, .file-drop.dragover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .field-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  .field-input, .field-select, .field-textarea {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 8px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    width: 100%;
+  }
+
+  .field-textarea {
+    resize: vertical;
+    min-height: 60px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .field-help {
+    font-size: 9px;
+    color: var(--ink-muted);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .variant-preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .variant-preview-chip {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 4px 8px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 10px;
+    color: var(--ink-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 20px 16px 60px; }
+    header { grid-template-columns: 1fr; }
+    .stats { text-align: left; }
+    .card-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+    .tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1 class="masthead">
+    Jerky<br>Collection
+    <span class="subtitle">Pokémon TCG cards illustrated by Jerky · personal checklist</span>
+  </h1>
+  <div class="stats">
+    <div class="big-num"><span id="owned-count">0</span><span class="of">/</span><span id="total-count">0</span></div>
+    <div class="label">Cards Collected · <span id="current-lang">English</span></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-lang="en">English <span class="count" id="en-count">—</span></button>
+  <button class="tab" data-lang="ja">Japanese <span class="count" id="ja-count">—</span></button>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-group">
+    <span class="toolbar-label">View —</span>
+    <button class="btn active" data-filter="all">All</button>
+    <button class="btn" data-filter="missing">Missing</button>
+    <button class="btn" data-filter="owned">Owned</button>
+  </div>
+  <div class="toolbar-group">
+    <button class="btn btn-accent" id="edit-mode-btn">✎ Edit Mode</button>
+    <button class="btn" id="add-card-btn" style="display:none;">+ Add Card</button>
+    <a class="btn btn-primary" href="https://limitlesstcg.com/cards?q=artist%3Ajerky" target="_blank" rel="noopener">↗ Limitless</a>
+    <button class="btn btn-primary" id="export-btn">⎘ Export List</button>
+    <button class="btn" id="data-btn">{ } Data</button>
+  </div>
+</div>
+
+<main id="main"></main>
+
+<footer>
+  <div>Click card to toggle · Edit Mode to add/edit/upload art · TCG = TCGplayer · LIM = Limitless · ART = Art of PKM</div>
+  <div id="footer-stat">— —</div>
+</footer>
+
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Bulk Card List</div>
+      <button class="modal-close" data-modal-close>×</button>
+    </div>
+    <div class="modal-body">
+      <p>PTCGL-style format (count, name, set, number). Paste into <strong>limitlesstcg.com/tools</strong> to print sheets of all card images, or any deck list tool.</p>
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <button class="btn active" data-export="all">All Cards</button>
+        <button class="btn" data-export="missing">Missing Only</button>
+        <button class="btn" data-export="lang">Current Tab Only</button>
+      </div>
+      <textarea class="export-area" id="export-text" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <span class="copy-status" id="copy-status">✓ Copied to clipboard</span>
+      <button class="btn btn-primary" id="copy-btn">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="detail-title">Card Details</div>
+      <button class="modal-close" data-modal-close>×</button>
+    </div>
+    <div class="modal-body">
+      <div class="card-detail">
+        <div>
+          <div class="art-preview" id="art-preview">
+            <span class="art-preview-empty">No artwork</span>
+          </div>
+          <div class="art-controls">
+            <input type="file" id="art-upload" accept="image/*" style="display:none;">
+            <div class="file-drop" id="art-drop">Click or drop image here</div>
+            <input type="text" class="field-input" id="art-url" placeholder="…or paste image URL">
+            <button class="btn" id="art-clear" style="font-size: 9px;">✕ Clear Art</button>
+          </div>
+        </div>
+        <div>
+          <div class="field-group">
+            <label class="field-label">Pokémon</label>
+            <input type="text" class="field-input" id="field-pokemon">
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Set</label>
+              <input type="text" class="field-input" id="field-set">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Card Number</label>
+              <input type="text" class="field-input" id="field-num" placeholder="30/86">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Type</label>
+              <select class="field-select" id="field-type">
+                <option value="normal">Normal (gets variants)</option>
+                <option value="secret">Secret / IR / SAR / ex</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Language</label>
+              <select class="field-select" id="field-language">
+                <option value="en">English</option>
+                <option value="ja">Japanese</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Notes</label>
+            <input type="text" class="field-input" id="field-notes" placeholder="e.g. Illustration Rare">
+          </div>
+          <div class="field-group">
+            <label class="field-label">
+              <input type="checkbox" id="field-pokeball" style="margin-right: 6px;">
+              Has Poké Ball + Master Ball variants
+            </label>
+            <div class="field-help">Default applies to Black Bolt, White Flare, Prismatic Evolutions, and Mega Dream ex (JP).</div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">
+              <input type="checkbox" id="field-unreleased" style="margin-right: 6px;">
+              Unreleased
+            </label>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Variants for this card</label>
+            <div class="variant-preview-list" id="variant-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="detail-delete">Delete Card</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" data-modal-close>Cancel</button>
+        <button class="btn btn-primary" id="detail-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DATA MODAL -->
+<div class="modal-overlay" id="data-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Card Data (JSON)</div>
+      <button class="modal-close" data-modal-close>×</button>
+    </div>
+    <div class="modal-body">
+      <p>Edit the underlying card list as JSON. Make changes and click <strong>Apply</strong> to update. Export to back up your data, or paste in JSON to import.</p>
+      <textarea class="export-area" id="data-text" style="min-height: 360px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <span class="copy-status" id="data-status">✓ Applied</span>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" id="data-download">↓ Download JSON</button>
+        <button class="btn" id="data-copy">⎘ Copy</button>
+        <button class="btn btn-primary" id="data-apply">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============ STORAGE BACKEND ============
+  // Three modes, auto-detected at startup:
+  //   1. "claude"     - window.storage already exists (Claude artifact runtime)
+  //   2. "cloudflare" - /api/storage endpoint responds OK (Pages Functions + KV)
+  //   3. "local"      - fallback to browser localStorage
+  //
+  // The polyfill installs onto window.storage so the rest of the app code
+  // doesn't need to change.
+
+  let STORAGE_BACKEND = 'unknown';
+  const AUTH_TOKEN_KEY = 'jerky-auth-token';
+
+  function getAuthToken() {
+    let t = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!t) {
+      t = prompt('Enter your collection edit token to save changes:');
+      if (t) localStorage.setItem(AUTH_TOKEN_KEY, t.trim());
+    }
+    return t ? t.trim() : '';
+  }
+
+  function clearAuthToken() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+
+  function buildLocalStorageBackend() {
+    return {
+      async get(key) {
+        const v = localStorage.getItem(key);
+        return v !== null ? { key, value: v, shared: false } : null;
+      },
+      async set(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return { key, value, shared: false };
+        } catch (e) {
+          console.error('localStorage write failed:', e);
+          alert('Browser storage is full. Clear some uploaded art or use image URLs instead.');
+          return null;
+        }
+      },
+      async delete(key) {
+        localStorage.removeItem(key);
+        return { key, deleted: true, shared: false };
+      },
+      async list(prefix) {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (!prefix || k.startsWith(prefix))) keys.push(k);
+        }
+        return { keys, prefix, shared: false };
+      },
+    };
+  }
+
+  function buildCloudflareBackend() {
+    async function authedFetch(url, init = {}) {
+      const token = getAuthToken();
+      if (!token) throw new Error('Auth token required');
+      const headers = { ...(init.headers || {}), 'Authorization': `Bearer ${token}` };
+      const res = await fetch(url, { ...init, headers });
+      if (res.status === 401) {
+        clearAuthToken();
+        alert('Invalid edit token — please re-enter it on your next change.');
+      }
+      return res;
+    }
+
+    return {
+      async get(key) {
+        const r = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
+        if (!r.ok) return null;
+        const body = await r.json();
+        return body; // either null or { key, value, shared }
+      },
+      async set(key, value) {
+        const r = await authedFetch(`/api/storage?key=${encodeURIComponent(key)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: value,
+        });
+        if (!r.ok) return null;
+        return await r.json();
+      },
+      async delete(key) {
+        const r = await authedFetch(`/api/storage?key=${encodeURIComponent(key)}`, {
+          method: 'DELETE',
+        });
+        if (!r.ok) return null;
+        return await r.json();
+      },
+      async list(prefix) {
+        const q = prefix ? `?prefix=${encodeURIComponent(prefix)}` : '';
+        const r = await fetch(`/api/storage/list${q}`);
+        if (!r.ok) return { keys: [], prefix, shared: false };
+        return await r.json();
+      },
+    };
+  }
+
+  async function detectAndInstallBackend() {
+    if (typeof window.storage !== 'undefined') {
+      STORAGE_BACKEND = 'claude';
+      return;
+    }
+
+    // Try Cloudflare API. Use list with a sentinel prefix as a cheap probe.
+    let cloudflareAvailable = false;
+    try {
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 4000);
+      const res = await fetch('/api/storage/list?prefix=__probe__', { signal: ctrl.signal });
+      clearTimeout(timeout);
+      // A real Pages Function returns JSON. A 404 from default static hosting won't.
+      if (res.ok) {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) cloudflareAvailable = true;
+      }
+    } catch (e) { /* offline or no endpoint */ }
+
+    if (cloudflareAvailable) {
+      window.storage = buildCloudflareBackend();
+      STORAGE_BACKEND = 'cloudflare';
+    } else {
+      window.storage = buildLocalStorageBackend();
+      STORAGE_BACKEND = 'local';
+    }
+  }
+
+
+  // ============ SEED DATA ============
+  // English cards by Jerky
+  const SEED_CARDS = [
+    // ENGLISH
+    { pokemon: 'Lumineon V', set: 'Crown Zenith', num: 'GG39/GG70', type: 'secret', notes: 'Galarian Gallery', language: 'en' },
+    { pokemon: 'Shuppet', set: 'Scarlet & Violet', num: '87/198', type: 'normal', language: 'en' },
+    { pokemon: 'Medicham', set: 'Scarlet & Violet', num: '111/198', type: 'normal', language: 'en' },
+    { pokemon: 'Sudowoodo', set: 'Paldea Evolved', num: '109/198', type: 'normal', language: 'en' },
+    { pokemon: 'Passimian', set: 'Paldea Evolved', num: '118/198', type: 'normal', language: 'en' },
+    { pokemon: 'Tropius', set: 'Paldea Evolved', num: '195/198', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Carvanha', set: 'Obsidian Flames', num: '46/197', type: 'normal', language: 'en' },
+    { pokemon: 'Buizel', set: 'Obsidian Flames', num: '48/197', type: 'normal', language: 'en' },
+    { pokemon: 'Rockruff', set: 'Obsidian Flames', num: '116/197', type: 'normal', language: 'en' },
+    { pokemon: 'Pidgey', set: 'Obsidian Flames', num: '207/197', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Pidgeotto', set: 'Obsidian Flames', num: '208/197', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Pidgeot ex', set: 'Obsidian Flames', num: '225/197', type: 'secret', notes: 'Special Art Rare', language: 'en' },
+    { pokemon: 'Bellsprout', set: '151', num: '69/165', type: 'normal', language: 'en' },
+    { pokemon: 'Weepinbell', set: '151', num: '70/165', type: 'normal', language: 'en' },
+    { pokemon: 'Victreebel', set: '151', num: '71/165', type: 'normal', language: 'en' },
+    { pokemon: 'Pansage', set: 'Paradox Rift', num: '4/182', type: 'normal', language: 'en' },
+    { pokemon: 'Tapu Koko ex', set: 'Paradox Rift', num: '247/182', type: 'secret', notes: 'Special Art Rare', language: 'en' },
+    { pokemon: 'Croconaw', set: 'Temporal Forces', num: '40/162', type: 'normal', language: 'en' },
+    { pokemon: 'Chimchar', set: 'Twilight Masquerade', num: '31/167', type: 'normal', language: 'en' },
+    { pokemon: 'Tatsugiri', set: 'Twilight Masquerade', num: '131/167', type: 'normal', language: 'en' },
+    { pokemon: 'Grubbin', set: 'Stellar Crown', num: '9/142', type: 'normal', language: 'en' },
+    { pokemon: 'Azumarill', set: 'Stellar Crown', num: '34/142', type: 'normal', language: 'en' },
+    { pokemon: 'Gulpin', set: 'Stellar Crown', num: '154/142', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Cetitan', set: 'Surging Sparks', num: '201/191', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Dragapult ex', set: 'Prismatic Evolutions', num: '165/131', type: 'secret', notes: 'Special Art Rare', language: 'en' },
+    { pokemon: 'Ludicolo', set: 'Journey Together', num: '37/159', type: 'normal', language: 'en' },
+    { pokemon: 'Greedent', set: 'Journey Together', num: '132/159', type: 'normal', language: 'en' },
+    { pokemon: "Team Rocket's Flaaffy", set: 'Destined Rivals', num: '73/182', type: 'normal', language: 'en' },
+    { pokemon: 'Hydrapple', set: 'Destined Rivals', num: '188/182', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Tynamo', set: 'Black Bolt', num: '30/86', type: 'normal', language: 'en' },
+    { pokemon: 'Eelektrik', set: 'Black Bolt', num: '31/86', type: 'normal', language: 'en' },
+    { pokemon: 'Eelektross', set: 'Black Bolt', num: '32/86', type: 'normal', language: 'en' },
+    { pokemon: 'Archeops', set: 'White Flare', num: '132/86', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Makuhita', set: 'Mega Evolution', num: '72/132', type: 'normal', language: 'en' },
+    { pokemon: 'Flygon', set: 'Phantasmal Flames', num: '53/94', type: 'normal', language: 'en' },
+    { pokemon: 'Ludicolo', set: 'Phantasmal Flames', num: '95/94', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Tatsugiri', set: 'Mega Dream ex', num: '135/193', type: 'normal', language: 'en' },
+    { pokemon: 'Dreepy', set: 'Mega Dream ex', num: '211/193', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Drakloak', set: 'Mega Dream ex', num: '212/193', type: 'secret', notes: 'Illustration Rare', language: 'en' },
+    { pokemon: 'Thievul', set: 'Abyss Eye', num: '089/081', type: 'secret', notes: 'Full Art — Upcoming', language: 'en', unreleased: true },
+
+    // JAPANESE
+    { pokemon: 'Tatsugiri', set: 'Promo / Misc', num: '003/045', type: 'normal', notes: 'Japanese release', language: 'ja' },
+    { pokemon: 'Nosepass', set: 'Nihil Zero', num: '036/080', type: 'normal', language: 'ja' },
+    { pokemon: 'Grubbin', set: 'Start Deck 100 Battle Collection', num: '057/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Chimchar', set: 'Start Deck 100 Battle Collection', num: '103/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Croconaw', set: 'Start Deck 100 Battle Collection', num: '166/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Ludicolo', set: 'Start Deck 100 Battle Collection', num: '177/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Tynamo', set: 'Start Deck 100 Battle Collection', num: '256/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Eelektrik', set: 'Start Deck 100 Battle Collection', num: '257/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Tatsugiri', set: 'Start Deck 100 Battle Collection', num: '549/742', type: 'normal', language: 'ja' },
+    { pokemon: 'Tynamo', set: 'Mega Dream ex (JP)', num: '047/193', type: 'normal', language: 'ja' },
+    { pokemon: 'Eelektrik', set: 'Mega Dream ex (JP)', num: '048/193', type: 'normal', language: 'ja' },
+    { pokemon: 'Tatsugiri', set: 'Mega Dream ex (JP)', num: '135/193', type: 'normal', language: 'ja' },
+    { pokemon: 'Dreepy', set: 'Mega Dream ex (JP)', num: '211/193', type: 'secret', notes: 'Illustration Rare', language: 'ja' },
+    { pokemon: 'Drakloak', set: 'Mega Dream ex (JP)', num: '212/193', type: 'secret', notes: 'Illustration Rare', language: 'ja' },
+    { pokemon: 'Flygon', set: 'Inferno X', num: '047/080', type: 'normal', notes: 'JP equivalent of Phantasmal Flames', language: 'ja' },
+    { pokemon: 'Ludicolo', set: 'Inferno X', num: '081/080', type: 'secret', notes: 'Illustration Rare', language: 'ja' },
+    { pokemon: 'Tatsugiri', set: 'Starter Set MEGA Mega Gengar ex', num: '009/021', type: 'normal', language: 'ja' },
+    { pokemon: 'Tatsugiri', set: 'Starter Set MEGA Mega Diancie ex', num: '009/021', type: 'normal', language: 'ja' },
+    { pokemon: 'Tatsugiri', set: 'Premium Trainer Box MEGA', num: '004/043', type: 'normal', language: 'ja' },
+    { pokemon: 'Makuhita', set: 'Mega Brave', num: '024/063', type: 'normal', notes: 'JP equivalent of Mega Evolution', language: 'ja' },
+    { pokemon: 'Tynamo', set: 'Black Bolt (JP)', num: '033/086', type: 'normal', language: 'ja' },
+    { pokemon: 'Eelektrik', set: 'Black Bolt (JP)', num: '034/086', type: 'normal', language: 'ja' },
+    { pokemon: 'Eelektross', set: 'Black Bolt (JP)', num: '035/086', type: 'normal', language: 'ja' },
+    { pokemon: 'Archeops', set: 'White Flare (JP)', num: '130/086', type: 'secret', notes: 'Illustration Rare', language: 'ja' },
+    { pokemon: "Team Rocket's Flaaffy", set: 'Glory of Team Rocket', num: '035/098', type: 'normal', notes: 'JP equivalent of Destined Rivals', language: 'ja' },
+  ];
+
+  // Sets that have Poke Ball + Master Ball reverse holo variants
+  const DEFAULT_POKEBALL_SETS = [
+    'Black Bolt', 'White Flare', 'Prismatic Evolutions',
+    'Black Bolt (JP)', 'White Flare (JP)', 'Mega Dream ex (JP)',
+  ];
+
+  // Best-effort set codes for Limitless / PTCGL exports
+  const SET_CODES = {
+    'Crown Zenith': 'CRZ',
+    'Scarlet & Violet': 'SVI',
+    'Paldea Evolved': 'PAL',
+    'Obsidian Flames': 'OBF',
+    '151': 'MEW',
+    'Paradox Rift': 'PAR',
+    'Temporal Forces': 'TEF',
+    'Twilight Masquerade': 'TWM',
+    'Stellar Crown': 'SCR',
+    'Surging Sparks': 'SSP',
+    'Prismatic Evolutions': 'PRE',
+    'Journey Together': 'JTG',
+    'Destined Rivals': 'DRI',
+    'Black Bolt': 'BLK',
+    'White Flare': 'WHF',
+    'Mega Evolution': 'MEG',
+    'Phantasmal Flames': 'PHF',
+    'Mega Dream ex': 'MDX',
+    'Abyss Eye': 'ABY',
+  };
+
+  // Set display order (used within each language tab)
+  const SET_ORDER_EN = [
+    'Abyss Eye', 'Mega Dream ex', 'Phantasmal Flames', 'Mega Evolution',
+    'White Flare', 'Black Bolt', 'Destined Rivals', 'Journey Together',
+    'Prismatic Evolutions', 'Surging Sparks', 'Stellar Crown',
+    'Twilight Masquerade', 'Temporal Forces', 'Paradox Rift', '151',
+    'Obsidian Flames', 'Paldea Evolved', 'Scarlet & Violet', 'Crown Zenith',
+  ];
+
+  const SET_ORDER_JA = [
+    'Mega Dream ex (JP)', 'Starter Set MEGA Mega Gengar ex',
+    'Starter Set MEGA Mega Diancie ex', 'Premium Trainer Box MEGA',
+    'Mega Brave', 'White Flare (JP)', 'Black Bolt (JP)',
+    'Glory of Team Rocket', 'Inferno X', 'Nihil Zero',
+    'Start Deck 100 Battle Collection', 'Promo / Misc',
+  ];
+
+  const VARIANT_LABELS = {
+    regular: 'Regular',
+    reverse_holo: 'Reverse Holo',
+    poke_ball: 'Poké Ball Holo',
+    master_ball: 'Master Ball Holo',
+  };
+
+  const VARIANT_SUFFIX = {
+    regular: '',
+    reverse_holo: ' RH',
+    poke_ball: ' Poké Ball',
+    master_ball: ' Master Ball',
+  };
+
+  // ============ STORAGE ============
+  const CARDS_KEY = 'jerky-cards-v3';
+  const COLLECTION_KEY = 'jerky-collection-v3';
+  const ART_KEY_PREFIX = 'jerky-art-v3:';
+  const SET_ORDER_EN_KEY = 'jerky-set-order-en-v3';
+  const SET_ORDER_JA_KEY = 'jerky-set-order-ja-v3';
+
+  let cards = [];
+  let collection = {};
+  let artwork = {}; // cardId -> URL (data URL or external)
+  let setOrderEn = [];
+  let setOrderJa = [];
+
+  async function loadAll() {
+    try {
+      const c = await window.storage.get(CARDS_KEY);
+      cards = c && c.value ? JSON.parse(c.value) : structuredClone(SEED_CARDS);
+    } catch (e) { cards = structuredClone(SEED_CARDS); }
+
+    // Assign stable IDs
+    cards.forEach((card, i) => {
+      if (!card.id) card.id = `card_${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}`;
+    });
+
+    try {
+      const coll = await window.storage.get(COLLECTION_KEY);
+      collection = coll && coll.value ? JSON.parse(coll.value) : {};
+    } catch (e) { collection = {}; }
+
+    // Load all artwork keys
+    try {
+      const list = await window.storage.list(ART_KEY_PREFIX);
+      if (list && list.keys) {
+        for (const key of list.keys) {
+          const cardId = key.slice(ART_KEY_PREFIX.length);
+          try {
+            const result = await window.storage.get(key);
+            if (result && result.value) artwork[cardId] = result.value;
+          } catch (e) { /* skip */ }
+        }
+      }
+    } catch (e) { /* no art yet */ }
+
+    // Load set orders (seed from constants if empty)
+    try {
+      const r = await window.storage.get(SET_ORDER_EN_KEY);
+      setOrderEn = r && r.value ? JSON.parse(r.value) : [...SET_ORDER_EN];
+    } catch (e) { setOrderEn = [...SET_ORDER_EN]; }
+    try {
+      const r = await window.storage.get(SET_ORDER_JA_KEY);
+      setOrderJa = r && r.value ? JSON.parse(r.value) : [...SET_ORDER_JA];
+    } catch (e) { setOrderJa = [...SET_ORDER_JA]; }
+
+    syncSetOrders();
+  }
+
+  async function saveSetOrders() {
+    try { await window.storage.set(SET_ORDER_EN_KEY, JSON.stringify(setOrderEn)); } catch (e) { console.error(e); }
+    try { await window.storage.set(SET_ORDER_JA_KEY, JSON.stringify(setOrderJa)); } catch (e) { console.error(e); }
+  }
+
+  // Add any new sets (from cards data) to the start of their language's order;
+  // remove sets that no longer have any cards.
+  function syncSetOrders() {
+    const enSets = new Set();
+    const jaSets = new Set();
+    cards.forEach((c) => {
+      if ((c.language || 'en') === 'ja') jaSets.add(c.set);
+      else enSets.add(c.set);
+    });
+    // Drop orphans
+    setOrderEn = setOrderEn.filter((s) => enSets.has(s));
+    setOrderJa = setOrderJa.filter((s) => jaSets.has(s));
+    // Prepend new sets
+    enSets.forEach((s) => { if (!setOrderEn.includes(s)) setOrderEn.unshift(s); });
+    jaSets.forEach((s) => { if (!setOrderJa.includes(s)) setOrderJa.unshift(s); });
+  }
+
+  async function saveCards() {
+    try { await window.storage.set(CARDS_KEY, JSON.stringify(cards)); } catch (e) { console.error(e); }
+  }
+  async function saveCollection() {
+    try { await window.storage.set(COLLECTION_KEY, JSON.stringify(collection)); } catch (e) { console.error(e); }
+  }
+  async function saveArt(cardId, url) {
+    try {
+      if (url) {
+        await window.storage.set(ART_KEY_PREFIX + cardId, url);
+        artwork[cardId] = url;
+      } else {
+        await window.storage.delete(ART_KEY_PREFIX + cardId);
+        delete artwork[cardId];
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  // ============ DERIVED ============
+  function getVariantsForCard(card) {
+    if (card.type === 'secret') return ['regular'];
+    const pokeball = card.pokeball !== undefined
+      ? card.pokeball
+      : DEFAULT_POKEBALL_SETS.includes(card.set);
+    if (pokeball) return ['regular', 'reverse_holo', 'poke_ball', 'master_ball'];
+    return ['regular', 'reverse_holo'];
+  }
+
+  function buildTiles() {
+    const tiles = [];
+    cards.forEach((card) => {
+      const variants = getVariantsForCard(card);
+      variants.forEach((variant) => {
+        tiles.push({
+          tileId: `${card.id}--${variant}`,
+          cardId: card.id,
+          pokemon: card.pokemon,
+          set: card.set,
+          num: card.num,
+          variant,
+          notes: card.notes || '',
+          language: card.language || 'en',
+          unreleased: !!card.unreleased,
+        });
+      });
+    });
+    return tiles;
+  }
+
+  function tcgplayerUrl(tile) {
+    const cardNum = tile.num.split('/')[0].replace(/^0+/, '');
+    const q = `${tile.pokemon} ${tile.set} ${cardNum}`;
+    return `https://www.tcgplayer.com/search/pokemon/product?q=${encodeURIComponent(q)}&view=grid`;
+  }
+
+  function limitlessUrl(tile) {
+    const setCode = SET_CODES[tile.set];
+    const langPart = tile.language === 'ja' ? ' lang:ja' : '';
+    if (setCode) {
+      return `https://limitlesstcg.com/cards?q=${encodeURIComponent(`name:"${tile.pokemon}" set:${setCode.toLowerCase()}${langPart}`)}`;
+    }
+    return `https://limitlesstcg.com/cards?q=${encodeURIComponent(`name:"${tile.pokemon}" artist:jerky${langPart}`)}`;
+  }
+
+  function artOfPkmUrl() {
+    return 'https://www.artofpkm.com/illustrators/37';
+  }
+
+  // ============ STATE ============
+  let currentLang = 'en';
+  let currentFilter = 'all';
+  let editMode = false;
+
+  // ============ RENDER ============
+  const main = document.getElementById('main');
+  const ownedCount = document.getElementById('owned-count');
+  const totalCount = document.getElementById('total-count');
+  const footerStat = document.getElementById('footer-stat');
+  const enCountEl = document.getElementById('en-count');
+  const jaCountEl = document.getElementById('ja-count');
+  const currentLangEl = document.getElementById('current-lang');
+
+  function render() {
+    const tiles = buildTiles().filter((t) => t.language === currentLang);
+    const allLangTiles = buildTiles();
+
+    const setOrder = currentLang === 'ja' ? setOrderJa : setOrderEn;
+    const bySet = {};
+    tiles.forEach((t) => {
+      if (!bySet[t.set]) bySet[t.set] = [];
+      bySet[t.set].push(t);
+    });
+
+    const setList = Object.keys(bySet).sort((a, b) => {
+      const ai = setOrder.indexOf(a);
+      const bi = setOrder.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
+    main.innerHTML = '';
+
+    if (setList.length === 0) {
+      main.innerHTML = `<div style="text-align: center; padding: 64px 20px; color: var(--ink-muted);">
+        <p style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;">No cards in this list yet.</p>
+        ${editMode ? '<p style="font-size: 11px; margin-top: 12px;">Click <strong>+ Add Card</strong> to add one.</p>' : ''}
+      </div>`;
+    }
+
+    setList.forEach((setName, idx) => {
+      const setTiles = bySet[setName];
+      const section = document.createElement('section');
+      section.className = 'set-section';
+      section.dataset.set = setName;
+
+      const ownedInSet = setTiles.filter((t) => collection[t.tileId]).length;
+      const isFirst = idx === 0;
+      const isLast = idx === setList.length - 1;
+
+      const header = document.createElement('div');
+      header.className = 'set-header';
+      header.innerHTML = `
+        <div class="set-name">${escapeHtml(setName)}</div>
+        <div class="set-rule"></div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="set-reorder">
+            <button class="set-arrow" data-move="up" data-set="${escapeAttr(setName)}" ${isFirst ? 'disabled' : ''} title="Move up">▲</button>
+            <button class="set-arrow" data-move="down" data-set="${escapeAttr(setName)}" ${isLast ? 'disabled' : ''} title="Move down">▼</button>
+          </span>
+          <span class="set-count">${String(ownedInSet).padStart(2,'0')} / ${String(setTiles.length).padStart(2,'0')}</span>
+        </div>
+      `;
+      section.appendChild(header);
+
+      const grid = document.createElement('div');
+      grid.className = 'card-grid';
+
+      setTiles.forEach((tile) => {
+        const collected = !!collection[tile.tileId];
+        const article = document.createElement('article');
+        article.className = `card-tile variant-${tile.variant}${collected ? ' collected' : ''}${tile.unreleased ? ' unreleased' : ''}`;
+        article.dataset.tileId = tile.tileId;
+        article.dataset.cardId = tile.cardId;
+        article.dataset.collected = collected ? '1' : '0';
+
+        const showVariantTag = tile.variant !== 'regular';
+        const variantLabel = VARIANT_LABELS[tile.variant];
+        const artUrl = artwork[tile.cardId];
+
+        let artContent;
+        if (artUrl) {
+          artContent = `
+            <img class="card-art-image" src="${escapeAttr(artUrl)}" alt="${escapeAttr(tile.pokemon)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;card-art-inner&quot;><div class=&quot;card-art-name&quot;>${escapeAttr(tile.pokemon)}</div><div class=&quot;card-art-placeholder&quot;>Image failed</div><div class=&quot;card-art-num&quot;>${escapeAttr(tile.num)}</div></div>'">
+            ${showVariantTag ? `<span class="variant-chip chip-${tile.variant}">${variantLabel}</span>` : ''}
+          `;
+        } else {
+          artContent = `
+            <div class="card-art-inner">
+              <div class="card-art-name">${escapeHtml(tile.pokemon)}</div>
+              <div class="card-art-placeholder">${tile.unreleased ? '' : 'Card Art'}</div>
+              <div class="card-art-num">${escapeHtml(tile.num)}</div>
+            </div>
+          `;
+        }
+
+        article.innerHTML = `
+          <div class="card-art">${artContent}</div>
+          <div class="card-meta">
+            ${showVariantTag ? `<span class="card-variant-tag variant-tag-${tile.variant}">${variantLabel}</span>` : ''}
+            <div class="card-pokemon">${escapeHtml(tile.pokemon)}</div>
+            <div class="card-set-line">
+              <span>${escapeHtml(tile.set)}</span>
+              <span>${escapeHtml(tile.num)}</span>
+            </div>
+            <div class="card-actions">
+              <div class="check-indicator">
+                <span class="check-box"></span>
+                <span>${collected ? 'OWNED' : 'MISSING'}</span>
+              </div>
+              <div class="link-group">
+                <a class="ext-link" href="${tcgplayerUrl(tile)}" target="_blank" rel="noopener" title="Search TCGplayer" onclick="event.stopPropagation()">TCG</a>
+                <a class="ext-link" href="${limitlessUrl(tile)}" target="_blank" rel="noopener" title="Search Limitless" onclick="event.stopPropagation()">LIM</a>
+                <a class="ext-link" href="${artOfPkmUrl()}" target="_blank" rel="noopener" title="Browse Art of Pokémon" onclick="event.stopPropagation()">ART</a>
+              </div>
+            </div>
+            ${tile.notes ? `<div class="card-notes">${escapeHtml(tile.notes)}</div>` : ''}
+          </div>
+        `;
+
+        article.addEventListener('click', (e) => {
+          if (editMode) {
+            openCardDetail(tile.cardId);
+          } else {
+            toggleTile(tile.tileId, article);
+          }
+        });
+        grid.appendChild(article);
+      });
+
+      section.appendChild(grid);
+      main.appendChild(section);
+    });
+
+    // Update tab counts
+    enCountEl.textContent = allLangTiles.filter((t) => t.language === 'en').length;
+    jaCountEl.textContent = allLangTiles.filter((t) => t.language === 'ja').length;
+
+    updateStats();
+    applyFilter(currentFilter);
+  }
+
+  function updateStats() {
+    const tiles = buildTiles().filter((t) => t.language === currentLang);
+    const total = tiles.length;
+    const owned = tiles.filter((t) => collection[t.tileId]).length;
+    ownedCount.textContent = owned;
+    totalCount.textContent = total;
+    const pct = total > 0 ? Math.round((owned / total) * 100) : 0;
+    const backendLabel = ({ claude: 'Claude', cloudflare: 'CF KV', local: 'Browser' })[STORAGE_BACKEND] || '';
+    footerStat.textContent = `${pct}% complete · ${total - owned} remaining${backendLabel ? ' · ' + backendLabel : ''}`;
+    currentLangEl.textContent = currentLang === 'en' ? 'English' : 'Japanese';
+  }
+
+  async function toggleTile(tileId, el) {
+    collection[tileId] = !collection[tileId];
+    if (!collection[tileId]) delete collection[tileId];
+
+    const isOwned = !!collection[tileId];
+    el.classList.toggle('collected', isOwned);
+    el.dataset.collected = isOwned ? '1' : '0';
+    const indicator = el.querySelector('.check-indicator span:last-child');
+    if (indicator) indicator.textContent = isOwned ? 'OWNED' : 'MISSING';
+
+    // Update set count
+    const section = el.closest('.set-section');
+    if (section) {
+      const setName = section.dataset.set;
+      const tiles = buildTiles().filter((t) => t.set === setName && t.language === currentLang);
+      const ownedInSet = tiles.filter((t) => collection[t.tileId]).length;
+      const counter = section.querySelector('.set-count');
+      if (counter) counter.textContent = `${String(ownedInSet).padStart(2,'0')} / ${String(tiles.length).padStart(2,'0')}`;
+    }
+
+    updateStats();
+    applyFilter(currentFilter);
+    await saveCollection();
+  }
+
+  // ============ FILTER ============
+  function applyFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.card-tile').forEach((tile) => {
+      const isOwned = tile.dataset.collected === '1';
+      let show = true;
+      if (filter === 'owned') show = isOwned;
+      if (filter === 'missing') show = !isOwned;
+      tile.classList.toggle('hidden', !show);
+    });
+    document.querySelectorAll('.set-section').forEach((section) => {
+      const visible = section.querySelectorAll('.card-tile:not(.hidden)').length;
+      section.classList.toggle('hidden', visible === 0);
+    });
+  }
+
+  document.querySelectorAll('.toolbar .btn[data-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toolbar .btn[data-filter]').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilter(btn.dataset.filter);
+    });
+  });
+
+  // ============ SET REORDER ============
+  main.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.set-arrow');
+    if (!btn) return;
+    e.stopPropagation();
+    const setName = btn.dataset.set;
+    const direction = btn.dataset.move;
+    const order = currentLang === 'ja' ? setOrderJa : setOrderEn;
+    const i = order.indexOf(setName);
+    if (i === -1) return;
+    if (direction === 'up' && i > 0) {
+      [order[i - 1], order[i]] = [order[i], order[i - 1]];
+    } else if (direction === 'down' && i < order.length - 1) {
+      [order[i], order[i + 1]] = [order[i + 1], order[i]];
+    } else {
+      return;
+    }
+    await saveSetOrders();
+    render();
+  });
+
+  // ============ TABS ============
+  document.querySelectorAll('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentLang = tab.dataset.lang;
+      document.body.classList.toggle('lang-ja', currentLang === 'ja');
+      render();
+    });
+  });
+
+  // ============ EDIT MODE ============
+  const editBtn = document.getElementById('edit-mode-btn');
+  const addBtn = document.getElementById('add-card-btn');
+
+  editBtn.addEventListener('click', () => {
+    editMode = !editMode;
+    document.body.classList.toggle('edit-mode', editMode);
+    editBtn.classList.toggle('active', editMode);
+    editBtn.textContent = editMode ? '✓ Done Editing' : '✎ Edit Mode';
+    addBtn.style.display = editMode ? 'inline-flex' : 'none';
+  });
+
+  addBtn.addEventListener('click', () => openCardDetail(null));
+
+  // ============ CARD DETAIL MODAL ============
+  const detailModal = document.getElementById('detail-modal');
+  const detailTitle = document.getElementById('detail-title');
+  const fPokemon = document.getElementById('field-pokemon');
+  const fSet = document.getElementById('field-set');
+  const fNum = document.getElementById('field-num');
+  const fType = document.getElementById('field-type');
+  const fLang = document.getElementById('field-language');
+  const fNotes = document.getElementById('field-notes');
+  const fPokeball = document.getElementById('field-pokeball');
+  const fUnreleased = document.getElementById('field-unreleased');
+  const variantPreview = document.getElementById('variant-preview');
+  const artPreview = document.getElementById('art-preview');
+  const artUrl = document.getElementById('art-url');
+  const artUpload = document.getElementById('art-upload');
+  const artDrop = document.getElementById('art-drop');
+  const artClear = document.getElementById('art-clear');
+  const detailDelete = document.getElementById('detail-delete');
+  const detailSave = document.getElementById('detail-save');
+
+  let editingCardId = null;
+  let pendingArtUrl = null; // null = no change, '' = clear, otherwise new URL
+
+  function openCardDetail(cardId) {
+    editingCardId = cardId;
+    pendingArtUrl = null;
+    const isNew = cardId === null;
+    detailTitle.textContent = isNew ? 'New Card' : 'Edit Card';
+    detailDelete.style.display = isNew ? 'none' : 'inline-flex';
+
+    let card;
+    if (isNew) {
+      card = { pokemon: '', set: '', num: '', type: 'normal', language: currentLang, notes: '', unreleased: false };
+    } else {
+      card = cards.find((c) => c.id === cardId);
+      if (!card) return;
+    }
+
+    fPokemon.value = card.pokemon || '';
+    fSet.value = card.set || '';
+    fNum.value = card.num || '';
+    fType.value = card.type || 'normal';
+    fLang.value = card.language || 'en';
+    fNotes.value = card.notes || '';
+    fUnreleased.checked = !!card.unreleased;
+
+    const defaultPokeball = DEFAULT_POKEBALL_SETS.includes(card.set);
+    fPokeball.checked = card.pokeball !== undefined ? card.pokeball : defaultPokeball;
+
+    // Art preview
+    const existingArt = isNew ? null : artwork[card.id];
+    setArtPreview(existingArt);
+    artUrl.value = '';
+
+    refreshVariantPreview();
+    detailModal.classList.add('open');
+  }
+
+  function setArtPreview(url) {
+    if (url) {
+      artPreview.innerHTML = `<img src="${escapeAttr(url)}" alt="preview" onerror="this.parentElement.innerHTML='<span class=&quot;art-preview-empty&quot;>Image failed to load</span>'">`;
+    } else {
+      artPreview.innerHTML = '<span class="art-preview-empty">No artwork</span>';
+    }
+  }
+
+  function refreshVariantPreview() {
+    const tempCard = {
+      type: fType.value,
+      set: fSet.value,
+      pokeball: fPokeball.checked,
+    };
+    const variants = getVariantsForCard(tempCard);
+    variantPreview.innerHTML = variants
+      .map((v) => `<span class="variant-preview-chip variant-tag-${v}">${VARIANT_LABELS[v]}</span>`)
+      .join('');
+  }
+
+  fType.addEventListener('change', refreshVariantPreview);
+  fPokeball.addEventListener('change', refreshVariantPreview);
+  fSet.addEventListener('input', () => {
+    // Auto-toggle pokeball checkbox when set name matches known sets
+    if (DEFAULT_POKEBALL_SETS.includes(fSet.value)) {
+      fPokeball.checked = true;
+    }
+    refreshVariantPreview();
+  });
+
+  // Art upload
+  artDrop.addEventListener('click', () => artUpload.click());
+  artDrop.addEventListener('dragover', (e) => { e.preventDefault(); artDrop.classList.add('dragover'); });
+  artDrop.addEventListener('dragleave', () => artDrop.classList.remove('dragover'));
+  artDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    artDrop.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  artUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+  });
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+    if (file.size > 4 * 1024 * 1024) { alert('Image too large. Max 4MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      pendingArtUrl = e.target.result;
+      setArtPreview(pendingArtUrl);
+      artUrl.value = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  artUrl.addEventListener('input', () => {
+    const v = artUrl.value.trim();
+    if (v) {
+      pendingArtUrl = v;
+      setArtPreview(v);
+    }
+  });
+
+  artClear.addEventListener('click', () => {
+    pendingArtUrl = '';
+    setArtPreview(null);
+    artUrl.value = '';
+  });
+
+  detailSave.addEventListener('click', async () => {
+    if (!fPokemon.value.trim() || !fSet.value.trim() || !fNum.value.trim()) {
+      alert('Please fill in Pokémon, Set, and Card Number.');
+      return;
+    }
+
+    const cardData = {
+      pokemon: fPokemon.value.trim(),
+      set: fSet.value.trim(),
+      num: fNum.value.trim(),
+      type: fType.value,
+      language: fLang.value,
+      notes: fNotes.value.trim(),
+      unreleased: fUnreleased.checked,
+    };
+    // Only persist the pokeball override if it differs from the default
+    const defaultPokeball = DEFAULT_POKEBALL_SETS.includes(cardData.set);
+    if (fPokeball.checked !== defaultPokeball) {
+      cardData.pokeball = fPokeball.checked;
+    }
+
+    let cardId;
+    if (editingCardId) {
+      const idx = cards.findIndex((c) => c.id === editingCardId);
+      if (idx === -1) return;
+      cardData.id = editingCardId;
+      cards[idx] = cardData;
+      cardId = editingCardId;
+    } else {
+      cardData.id = `card_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      cards.push(cardData);
+      cardId = cardData.id;
+    }
+
+    // Persist artwork change
+    if (pendingArtUrl !== null) {
+      await saveArt(cardId, pendingArtUrl || null);
+    }
+
+    await saveCards();
+    syncSetOrders();
+    await saveSetOrders();
+    detailModal.classList.remove('open');
+    render();
+  });
+
+  detailDelete.addEventListener('click', async () => {
+    if (!editingCardId) return;
+    if (!confirm('Delete this card? Variants and ownership state will be removed.')) return;
+    cards = cards.filter((c) => c.id !== editingCardId);
+    // Clean up collection state for this card
+    Object.keys(collection).forEach((tileId) => {
+      if (tileId.startsWith(editingCardId + '--')) delete collection[tileId];
+    });
+    await saveArt(editingCardId, null);
+    await saveCards();
+    await saveCollection();
+    syncSetOrders();
+    await saveSetOrders();
+    detailModal.classList.remove('open');
+    render();
+  });
+
+  // ============ EXPORT LIST MODAL ============
+  const exportModal = document.getElementById('export-modal');
+  const exportText = document.getElementById('export-text');
+  const copyStatus = document.getElementById('copy-status');
+  let exportMode = 'all';
+
+  function generateExport(mode) {
+    const tiles = buildTiles();
+    const lines = ['# Jerky Collection · Pokémon TCG bulk list', '# Format: count name SETCODE number variant', ''];
+    let filtered;
+    if (mode === 'missing') filtered = tiles.filter((t) => !collection[t.tileId]);
+    else if (mode === 'lang') filtered = tiles.filter((t) => t.language === currentLang);
+    else filtered = tiles;
+
+    const bySet = {};
+    filtered.forEach((t) => {
+      const key = `${t.language}:${t.set}`;
+      if (!bySet[key]) bySet[key] = { set: t.set, language: t.language, tiles: [] };
+      bySet[key].tiles.push(t);
+    });
+
+    const sortedKeys = Object.keys(bySet).sort((a, b) => {
+      const ag = bySet[a];
+      const bg = bySet[b];
+      if (ag.language !== bg.language) return ag.language === 'en' ? -1 : 1;
+      const order = ag.language === 'en' ? setOrderEn : setOrderJa;
+      const ai = order.indexOf(ag.set);
+      const bi = order.indexOf(bg.set);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
+    sortedKeys.forEach((key) => {
+      const group = bySet[key];
+      const setCode = SET_CODES[group.set] || group.set.replace(/\s+/g,'').toUpperCase().slice(0,8);
+      const langTag = group.language === 'ja' ? ' [JP]' : '';
+      lines.push(`## ${group.set} (${setCode})${langTag}`);
+      group.tiles.forEach((tile) => {
+        const cardNum = tile.num.split('/')[0].replace(/^0+/, '');
+        const variantSuffix = VARIANT_SUFFIX[tile.variant];
+        lines.push(`1 ${tile.pokemon} ${setCode} ${cardNum}${variantSuffix}`);
+      });
+      lines.push('');
+    });
+
+    return lines.join('\n');
+  }
+
+  document.getElementById('export-btn').addEventListener('click', () => {
+    exportText.value = generateExport(exportMode);
+    exportModal.classList.add('open');
+  });
+
+  document.querySelectorAll('.modal-body .btn[data-export]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.modal-body .btn[data-export]').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      exportMode = btn.dataset.export;
+      exportText.value = generateExport(exportMode);
+    });
+  });
+
+  document.getElementById('copy-btn').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(exportText.value); }
+    catch (e) { exportText.select(); document.execCommand('copy'); }
+    copyStatus.classList.add('show');
+    setTimeout(() => copyStatus.classList.remove('show'), 2000);
+  });
+
+  // ============ DATA MODAL ============
+  const dataModal = document.getElementById('data-modal');
+  const dataText = document.getElementById('data-text');
+  const dataStatus = document.getElementById('data-status');
+
+  document.getElementById('data-btn').addEventListener('click', () => {
+    const dataToShow = cards.map((c) => {
+      const out = { ...c };
+      delete out.id; // hide internal IDs
+      return out;
+    });
+    dataText.value = JSON.stringify(dataToShow, null, 2);
+    dataModal.classList.add('open');
+  });
+
+  document.getElementById('data-copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(dataText.value); }
+    catch (e) { dataText.select(); document.execCommand('copy'); }
+    dataStatus.textContent = '✓ Copied';
+    dataStatus.classList.add('show');
+    setTimeout(() => dataStatus.classList.remove('show'), 2000);
+  });
+
+  document.getElementById('data-download').addEventListener('click', () => {
+    const blob = new Blob([dataText.value], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'jerky-collection.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('data-apply').addEventListener('click', async () => {
+    let parsed;
+    try {
+      parsed = JSON.parse(dataText.value);
+    } catch (e) {
+      alert('Invalid JSON: ' + e.message);
+      return;
+    }
+    if (!Array.isArray(parsed)) { alert('JSON must be an array of card objects.'); return; }
+
+    // Validate & assign IDs (preserve existing IDs where possible by matching pokemon+set+num+language)
+    const oldCardsBySig = {};
+    cards.forEach((c) => {
+      const sig = `${c.pokemon}|${c.set}|${c.num}|${c.language || 'en'}`;
+      oldCardsBySig[sig] = c.id;
+    });
+
+    parsed.forEach((c, i) => {
+      if (!c.pokemon || !c.set || !c.num) {
+        alert(`Card #${i+1} is missing required fields (pokemon, set, num).`);
+        throw new Error('aborted');
+      }
+      const sig = `${c.pokemon}|${c.set}|${c.num}|${c.language || 'en'}`;
+      c.id = oldCardsBySig[sig] || `card_${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}`;
+      c.type = c.type || 'normal';
+      c.language = c.language || 'en';
+    });
+
+    cards = parsed;
+    await saveCards();
+    syncSetOrders();
+    await saveSetOrders();
+    dataStatus.textContent = '✓ Applied';
+    dataStatus.classList.add('show');
+    setTimeout(() => dataStatus.classList.remove('show'), 2000);
+    render();
+  });
+
+  // ============ MODAL CLOSE ============
+  document.querySelectorAll('[data-modal-close]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btn.closest('.modal-overlay').classList.remove('open');
+    });
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  // ============ UTIL ============
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+  function escapeAttr(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
+  // ============ INIT ============
+  (async () => {
+    await detectAndInstallBackend();
+    await loadAll();
+    render();
+  })();
+</script>
+</body>
+</html>
