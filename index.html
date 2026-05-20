@@ -434,6 +434,13 @@
       radial-gradient(circle at 72% 70%, rgba(120,50,160,0.24) 0%, rgba(120,50,160,0.24) 10%, transparent 10%),
       linear-gradient(180deg, rgba(120,50,160,0.06), rgba(120,50,160,0.16));
   }
+  .variant-custom .card-art-placeholder {
+    background:
+      repeating-linear-gradient(135deg,
+        rgba(184,138,30,0.22) 0px, rgba(184,138,30,0.22) 6px,
+        transparent 6px, transparent 14px),
+      var(--bg-grid);
+  }
 
   /* Variant chip overlay when image present */
   .variant-chip {
@@ -453,6 +460,7 @@
   .variant-chip.chip-reverse_holo { background: linear-gradient(90deg, #ffe7e7, #e7ffe7, #e7e7ff); }
   .variant-chip.chip-poke_ball { background: var(--accent); color: var(--paper); border-color: var(--accent-deep); }
   .variant-chip.chip-master_ball { background: #5b2e8a; color: var(--paper); border-color: #3a1d59; }
+  .variant-chip.chip-custom { background: #b88a1e; color: var(--paper); border-color: #6b4f10; }
 
   .card-meta {
     padding: 10px 12px;
@@ -499,6 +507,7 @@
   .variant-tag-reverse_holo { background: linear-gradient(90deg, #ffe7e7, #e7ffe7, #e7e7ff); }
   .variant-tag-poke_ball { background: var(--accent); color: var(--paper); border-color: var(--accent-deep); }
   .variant-tag-master_ball { background: #5b2e8a; color: var(--paper); border-color: #3a1d59; }
+  .variant-tag-custom { background: #b88a1e; color: var(--paper); border-color: #6b4f10; }
 
   .card-actions {
     display: flex;
@@ -975,6 +984,11 @@
             </label>
           </div>
           <div class="field-group">
+            <label class="field-label">Custom Variants</label>
+            <input type="text" class="field-input" id="field-custom-variants" placeholder="e.g. Ball Stamped, Energy Stamped">
+            <div class="field-help">Comma-separated. Each name adds an extra variant tile for this card (e.g. Ascended Heroes ball/energy stamps).</div>
+          </div>
+          <div class="field-group">
             <label class="field-label">Variants for this card</label>
             <div class="variant-preview-list" id="variant-preview"></div>
           </div>
@@ -1278,6 +1292,23 @@
     master_ball: ' Master Ball',
   };
 
+  // Custom variants are stored as `custom:<user-typed name>` so they survive
+  // round-trips through the collection store. These helpers normalize lookups.
+  function isCustomVariant(v) { return typeof v === 'string' && v.startsWith('custom:'); }
+  function customVariantName(v) { return v.slice(7); }
+  function variantLabelOf(v) {
+    if (isCustomVariant(v)) return customVariantName(v);
+    return VARIANT_LABELS[v] || v;
+  }
+  function variantSuffixOf(v) {
+    if (isCustomVariant(v)) return ' ' + customVariantName(v);
+    return VARIANT_SUFFIX[v] || '';
+  }
+  function variantCssKey(v) {
+    if (isCustomVariant(v)) return 'custom';
+    return v;
+  }
+
   // ============ STORAGE ============
   const CARDS_KEY = 'jerky-cards-v3';
   const COLLECTION_KEY = 'jerky-collection-v3';
@@ -1376,12 +1407,17 @@
 
   // ============ DERIVED ============
   function getVariantsForCard(card) {
-    if (card.type === 'secret') return ['regular'];
+    const customs = Array.isArray(card.customVariants)
+      ? card.customVariants.filter((n) => typeof n === 'string' && n.trim()).map((n) => 'custom:' + n.trim())
+      : [];
+    if (card.type === 'secret') return ['regular', ...customs];
     const pokeball = card.pokeball !== undefined
       ? card.pokeball
       : DEFAULT_POKEBALL_SETS.includes(card.set);
-    if (pokeball) return ['regular', 'reverse_holo', 'poke_ball', 'master_ball'];
-    return ['regular', 'reverse_holo'];
+    const base = pokeball
+      ? ['regular', 'reverse_holo', 'poke_ball', 'master_ball']
+      : ['regular', 'reverse_holo'];
+    return [...base, ...customs];
   }
 
   function buildTiles() {
@@ -1495,20 +1531,21 @@
       setTiles.forEach((tile) => {
         const collected = !!collection[tile.tileId];
         const article = document.createElement('article');
-        article.className = `card-tile variant-${tile.variant}${collected ? ' collected' : ''}${tile.unreleased ? ' unreleased' : ''}`;
+        article.className = `card-tile variant-${variantCssKey(tile.variant)}${collected ? ' collected' : ''}${tile.unreleased ? ' unreleased' : ''}`;
         article.dataset.tileId = tile.tileId;
         article.dataset.cardId = tile.cardId;
         article.dataset.collected = collected ? '1' : '0';
 
         const showVariantTag = tile.variant !== 'regular';
-        const variantLabel = VARIANT_LABELS[tile.variant];
+        const variantLabel = variantLabelOf(tile.variant);
+        const variantCss = variantCssKey(tile.variant);
         const artUrl = artwork[tile.cardId];
 
         let artContent;
         if (artUrl) {
           artContent = `
             <img class="card-art-image" src="${escapeAttr(artUrl)}" alt="${escapeAttr(tile.pokemon)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;card-art-inner&quot;><div class=&quot;card-art-name&quot;>${escapeAttr(tile.pokemon)}</div><div class=&quot;card-art-placeholder&quot;>Image failed</div><div class=&quot;card-art-num&quot;>${escapeAttr(tile.num)}</div></div>'">
-            ${showVariantTag ? `<span class="variant-chip chip-${tile.variant}">${variantLabel}</span>` : ''}
+            ${showVariantTag ? `<span class="variant-chip chip-${variantCss}">${escapeHtml(variantLabel)}</span>` : ''}
           `;
         } else {
           artContent = `
@@ -1523,7 +1560,7 @@
         article.innerHTML = `
           <div class="card-art">${artContent}</div>
           <div class="card-meta">
-            ${showVariantTag ? `<span class="card-variant-tag variant-tag-${tile.variant}">${variantLabel}</span>` : ''}
+            ${showVariantTag ? `<span class="card-variant-tag variant-tag-${variantCss}">${escapeHtml(variantLabel)}</span>` : ''}
             <div class="card-pokemon">${escapeHtml(tile.pokemon)}</div>
             <div class="card-set-line">
               <span>${escapeHtml(tile.set)}</span>
@@ -1684,6 +1721,7 @@
   const fNotes = document.getElementById('field-notes');
   const fPokeball = document.getElementById('field-pokeball');
   const fUnreleased = document.getElementById('field-unreleased');
+  const fCustomVariants = document.getElementById('field-custom-variants');
   const variantPreview = document.getElementById('variant-preview');
   const artPreview = document.getElementById('art-preview');
   const artUrl = document.getElementById('art-url');
@@ -1718,6 +1756,7 @@
     fLang.value = card.language || 'en';
     fNotes.value = card.notes || '';
     fUnreleased.checked = !!card.unreleased;
+    fCustomVariants.value = Array.isArray(card.customVariants) ? card.customVariants.join(', ') : '';
 
     const defaultPokeball = DEFAULT_POKEBALL_SETS.includes(card.set);
     fPokeball.checked = card.pokeball !== undefined ? card.pokeball : defaultPokeball;
@@ -1739,20 +1778,34 @@
     }
   }
 
+  function parseCustomVariantsInput() {
+    const seen = new Set();
+    const out = [];
+    fCustomVariants.value.split(',').forEach((raw) => {
+      const name = raw.trim();
+      if (!name || seen.has(name)) return;
+      seen.add(name);
+      out.push(name);
+    });
+    return out;
+  }
+
   function refreshVariantPreview() {
     const tempCard = {
       type: fType.value,
       set: fSet.value,
       pokeball: fPokeball.checked,
+      customVariants: parseCustomVariantsInput(),
     };
     const variants = getVariantsForCard(tempCard);
     variantPreview.innerHTML = variants
-      .map((v) => `<span class="variant-preview-chip variant-tag-${v}">${VARIANT_LABELS[v]}</span>`)
+      .map((v) => `<span class="variant-preview-chip variant-tag-${variantCssKey(v)}">${escapeHtml(variantLabelOf(v))}</span>`)
       .join('');
   }
 
   fType.addEventListener('change', refreshVariantPreview);
   fPokeball.addEventListener('change', refreshVariantPreview);
+  fCustomVariants.addEventListener('input', refreshVariantPreview);
   fSet.addEventListener('input', () => {
     // Auto-toggle pokeball checkbox when set name matches known sets
     if (DEFAULT_POKEBALL_SETS.includes(fSet.value)) {
@@ -1823,6 +1876,9 @@
     if (fPokeball.checked !== defaultPokeball) {
       cardData.pokeball = fPokeball.checked;
     }
+
+    const customs = parseCustomVariantsInput();
+    if (customs.length > 0) cardData.customVariants = customs;
 
     let cardId;
     if (editingCardId) {
@@ -1904,7 +1960,7 @@
       lines.push(`## ${group.set} (${setCode})${langTag}`);
       group.tiles.forEach((tile) => {
         const cardNum = tile.num.split('/')[0].replace(/^0+/, '');
-        const variantSuffix = VARIANT_SUFFIX[tile.variant];
+        const variantSuffix = variantSuffixOf(tile.variant);
         lines.push(`1 ${tile.pokemon} ${setCode} ${cardNum}${variantSuffix}`);
       });
       lines.push('');
